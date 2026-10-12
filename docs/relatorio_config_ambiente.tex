@@ -1,0 +1,143 @@
+\documentclass[12pt,a4paper]{article}
+
+% ================================================================
+% PACOTES
+% ================================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{quoting}
+\usepackage{microtype}
+\usepackage{geometry}
+\usepackage{csquotes}
+
+
+\usepackage[style=abnt, backend=biber]{biblatex}
+\addbibresource{referencias.bib} 
+
+\usepackage{listings}
+\usepackage{url}
+\usepackage{hyperref}
+
+% ================================================================
+% CONFIGURAÇÕES
+% ================================================================
+
+\quotingsetup{
+    font=small,
+    leftmargin=4cm,
+    rightmargin=0cm
+}
+
+\geometry{
+    a4paper,
+    margin=2.5cm
+}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    citecolor=black
+}
+
+% Espaçamento das listas
+\setlist[itemize]{
+    itemsep=0.2em,
+    topsep=0.3em
+}
+
+\lstset{
+  numbers=left,        % Coloca os números à esquerda
+  stepnumber=1,        % Numera de 1 em 1 linha
+  numberstyle=\tiny,   % Tamanho da fonte dos números
+  numbersep=5pt        % Espaço entre o número e o código
+}
+
+% ================================================================
+% INFORMAÇÕES DO DOCUMENTO
+% ================================================================
+
+\title{
+    \textbf{Relatório de Configuração do Ambiente}\\[0.3cm]
+    \large Ambiente de Testes de Injeção de Falhas em Dispositivos IoT
+}
+
+\author{Eduardo Diniz da Silva}
+\date{}
+
+% ================================================================
+% DOCUMENTO
+% ================================================================
+
+\begin{document}
+
+% ================================================================
+% FOLHA DE ROSTO
+% ================================================================
+
+\begin{center}
+    
+    \large
+    Escola de Artes, Ciências e Humanidades --- Universidade de São Paulo
+
+    \vspace{1.5cm}
+
+    \Large
+    \textbf{RELATÓRIO DE CONFIGURAÇÃO DO AMBIENTE}
+
+    \vspace{0.3cm}
+
+    \large
+    \textit{Ambiente de Testes de Injeção de Falhas em Dispositivos IoT}
+
+    \vspace{1cm}
+
+    \normalsize
+
+    \begin{tabular}{ll}
+        \textbf{Área:} & Sistemas de Informação / Segurança da Informação \\
+        \textbf{Estudante:} & Eduardo Diniz da Silva \\
+        \textbf{Orientador:} & Prof. Fábio Nakano
+    \end{tabular}
+
+\end{center}
+
+\section{Resumo}
+
+Este relatório descreve a configuração do ambiente de testes de injeção de falhas em dispositivos IoT.
+
+\section{Configuração Inicial do Ambiente}
+
+A primeira etapa foi a instalação do QEMU, emulador de hardware, do GDB, depurador de código, do Newlib, biblioteca C padrão e do Make, ferramenta de automação de compilação.
+\begin{lstlisting}[language=bash]
+    sudo dnf install qemu-system-arm 
+    sudo dnf install gdb 
+    sudo dnf install arm-none-eabi-gcc arm-none-eabi-newlib 
+    sudo dnf install make
+\end{lstlisting} 
+Em seguida, foi feito o mapeamento físico da placa virtual no arquivo \texttt{linker.ld}, que define a memória FLASH e RAM, bem como o endereço do topo da pilha (stack) da RAM. Após isso, foi implementado o arquivo 
+\texttt{startup.c}, que contém o código de inicialização do sistema. Ambos tiveram como referência o repositório \cite{cortexm_baremetal} e estão disponíveis no repositório do projeto \url{https://github.com/D1n7z/ic-ascon}.
+Além disso, foi criado o arquivo \texttt{Makefile}, que automatiza o processo de compilação do projeto:
+\begin{itemize}
+    \item \texttt{make build}: compila o projeto e gera o binário\texttt{firmware.elf}.
+    \item \texttt{make run}: executa o binário no QEMU
+    \item \texttt{make clean}: remove os arquivos gerados durante a compilação para uma reconstrução limpa.
+\end{itemize}
+Finalizando a configuração inicial do ambiente, foi feito um teste de execução do binário no QEMU, através de um arquivo \texttt{main.c} que imprimiu a mensagem "Hello, World!" no console do terminal.
+
+
+% ================================================================
+% REFERÊNCIAS BIBLIOGRÁFICAS
+% ================================================================
+\printbibliography[title={Referências Bibliográficas}]
+
+\end{document}
