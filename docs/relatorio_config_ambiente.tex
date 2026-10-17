@@ -111,9 +111,18 @@
 
 \end{center}
 
+% ================================================================
+% RESUMO
+% ================================================================
+
 \section{Resumo}
 
 Este relatório descreve a configuração do ambiente de testes de injeção de falhas em dispositivos IoT.
+
+
+% ================================================================
+% CONFIGURAÇÃO INICIAL DO AMBIENTE
+% ================================================================
 
 \section{Configuração Inicial do Ambiente}
 
@@ -132,7 +141,46 @@ Além disso, foi criado o arquivo \texttt{Makefile}, que automatiza o processo d
     \item \texttt{make run}: executa o binário no QEMU
     \item \texttt{make clean}: remove os arquivos gerados durante a compilação para uma reconstrução limpa.
 \end{itemize}
-Finalizando a configuração inicial do ambiente, foi feito um teste de execução do binário no QEMU, através de um arquivo \texttt{main.c} que imprimiu a mensagem "Hello, World!" no console do terminal.
+Finalizando a configuração inicial do ambiente, foi feito um teste de execução do binário no QEMU, através de um arquivo \texttt{main.c} 
+\begin{lstlisting} [language=C]
+    #include <stdio.h>
+
+    extern void initialise_monitor_handles(void);
+
+    int main(void) {
+        initialise_monitor_handles();
+
+        printf("\nHello, World!\n");
+        return 0;
+    }
+\end{lstlisting}
+que imprimiu a mensagem "Hello, World!" no console do terminal. Com isso, a parte inicial de instalação e configuração do QEMU foi concluída com sucesso.
+
+% ===============================================================
+% CONFIGURAÇÃO DO GDB
+% ================================================================
+
+A próxima etapa foi a configuração do GDB, que é o depurador de código. Para isso, foi criado um novo \texttt{main.c} com um código simples de soma para testar o GDB:
+\begin{lstlisting} [language=C]
+    #include <stdio.h>
+
+    extern void initialise_monitor_handles(void);
+
+    int main(void) {
+        initialise_monitor_handles();
+
+        volatile int soma = 0;
+
+        printf("Inicio da execucao do programa\n");
+        for (int i = 0; i < 5; i++) {
+            soma += i;
+        }
+        printf("Soma: %d\n", soma);
+
+        return 0;
+    }
+\end{lstlisting}
+
 
 
 % ================================================================
