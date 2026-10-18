@@ -59,7 +59,8 @@
   numbers=left,        % Coloca os números à esquerda
   stepnumber=1,        % Numera de 1 em 1 linha
   numberstyle=\tiny,   % Tamanho da fonte dos números
-  numbersep=5pt        % Espaço entre o número e o código
+  numbersep=5pt,       % Espaço entre o número e o código
+  literate={ã}{{\~a}}1 {ç}{{\c{c}}}1 {ê}{{\^e}}1 {í}{{\'i}}1
 }
 
 % ================================================================
@@ -180,7 +181,48 @@ A próxima etapa foi a configuração do GDB, que é o depurador de código. Par
         return 0;
     }
 \end{lstlisting}
+O código foi compilado e executado normalmente no QEMU, imprimindo a mensagem "Inicio da execução do programa" e o resultado da soma = 10. Em seguida, foi executado no QEMU com o comando \texttt{qemu-system-arm -M mps2-an385 -cpu cortex-m3 -m 16M -nographic -kernel firmware.elf -semihosting -S -gdb tcp::1234} e o GDB foi iniciado com o comando \texttt{gdb firmware.elf} e conectado ao QEMU com o comando \texttt{target remote :1234}.
+Atrvés do GDB, foi possível depurar o código e durante a execução do programa, um registrador teve seu valor alterado de 0 para 100, e o resultado da soma foi alterado de 10 para 110. A fim de validar o ambiente, o processo foi repetido com um script em Python:
+\begin{lstlisting}[language=Python]
+    import gdb
 
+    gdb.execute("set pagination off")
+
+    print("Injetor de falhas iniciado.")
+
+    # Conectar ao QEMU
+    gdb.execute("target remote :1234")
+
+    # Definir breakpoint no início de main
+    gdb.execute("break main")
+    gdb.execute("continue")
+
+    # Pula para o início do laço for
+    for _ in range(3):
+        gdb.execute("next")
+
+    # Entrar no laço for
+    for _ in range(8):
+        gdb.execute("stepi")
+
+    # Lê o valor do registrador r3
+    valor_r3 = gdb.parse_and_eval("$r3")
+    print(f"Valor original do registrador r3: {valor_r3}")
+
+    # Altera o valor do registrador r3 para 100
+    print("Alterando o valor do registrador r3 para 100.")
+    gdb.execute("set $r3 = 100")
+
+    # Continua a execução do programa
+    print("Continuando a execução do programa")
+    gdb.execute("continue")
+
+    # Desconecta do GDB e encerra o script
+    gdb.execute("quit")
+
+\end{lstlisting}
+
+O resultado da execução do script foi o mesmo que a execução manual, alterando o valor do registrador r3 de 0 para 100 e o resultado da soma de 10 para 110. Com isso, a configuração do GDB foi concluída com sucesso.
 
 
 % ================================================================
