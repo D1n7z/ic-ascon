@@ -1,3 +1,5 @@
+/* Código adaptado do repositorio: https://github.com/cortexm/baremetal */
+
 ENTRY(RESET_handler)
 
 MEMORY

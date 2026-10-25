@@ -1,3 +1,5 @@
+//Código adaptado do repositorio: https://github.com/cortexm/baremetal
+
 #include <stdint.h>
 
 // Aponta que a função main() está em outro arquivo 
