@@ -122,10 +122,10 @@ Este relatório descreve a configuração do ambiente de testes de injeção de 
 
 
 % ================================================================
-% CONFIGURAÇÃO INICIAL DO AMBIENTE
+% CONFIGURAÇÃO DO QEMU
 % ================================================================
 
-\section{Configuração Inicial do Ambiente}
+\section{Configuração do QEMU}
 
 A primeira etapa foi a instalação do QEMU, emulador de hardware, do GDB, depurador de código, do Newlib, biblioteca C padrão e do Make, ferramenta de automação de compilação.
 \begin{lstlisting}[language=bash]
@@ -160,6 +160,8 @@ que imprimiu a mensagem "Hello, World!" no console do terminal. Com isso, a part
 % ===============================================================
 % CONFIGURAÇÃO DO GDB
 % ================================================================
+
+\section{Configuração do GDB}
 
 A próxima etapa foi a configuração do GDB, que é o depurador de código. Para isso, foi criado um novo \texttt{main.c} com um código simples de soma para testar o GDB:
 \begin{lstlisting} [language=C]
@@ -222,7 +224,21 @@ Atrvés do GDB, foi possível depurar o código e durante a execução do progra
 
 \end{lstlisting}
 
-O resultado da execução do script foi o mesmo que a execução manual, alterando o valor do registrador r3 de 0 para 100 e o resultado da soma de 10 para 110. Com isso, a configuração do GDB foi concluída com sucesso.
+O resultado da execução do script foi o mesmo que a execução manual, alterando o valor do registrador r3 de 0 para 100 e o resultado da soma de 10 para 110. Depois foi realizado mais um teste, alterando o valor do registrador pc para 0, que gerou um HardFault, que é uma exceção gerada pelo processador quando ocorre um erro crítico. 
+\begin{lstlisting} 
+    Início da execução do programa
+    qemu: fatal: Lockup: can't escalate 3 to HardFault (current priority -1)
+
+    R00=00000000 R01=20000894 R02=00000000 R03=20000808
+    R04=00000000 R05=00000000 R06=00000000 R07=203fffe8
+    R08=00000000 R09=00000000 R10=00000000 R11=00000000
+    R12=00000001 R13=203ffff8 R14=fffffff9 R15=d0024282
+    XPSR=61000003 -ZC- T handler
+    FPSCR: 00000000
+    [1]    103042 IOT instruction (core dumped)  qemu-system-arm -M mps2-an385 -cpu cortex-m3 -m 16M -nographic -kernel   -S  
+    
+\end{lstlisting}
+O HardFault foi capturado pelo QEMU e exibido no console do terminal, indicando que o ambiente de testes de injeção de falhas em dispositivos IoT está funcionando corretamente. Com isso, a configuração do GDB foi concluída com sucesso.
 
 
 % ================================================================
