@@ -1,0 +1,163 @@
+\documentclass[12pt,a4paper]{article}
+
+% ================================================================
+% PACOTES
+% ================================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{quoting}
+\usepackage{microtype}
+\usepackage{geometry}
+\usepackage{csquotes}
+
+
+\usepackage[style=abnt, backend=biber]{biblatex}
+\addbibresource{referencias_rif.bib} 
+
+\usepackage{listings}
+\usepackage{url}
+\usepackage{hyperref}
+
+% ================================================================
+% CONFIGURAÇÕES
+% ================================================================
+
+\quotingsetup{
+    font=small,
+    leftmargin=4cm,
+    rightmargin=0cm
+}
+
+\geometry{
+    a4paper,
+    margin=2.5cm
+}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    citecolor=black
+}
+
+% Espaçamento das listas
+\setlist[itemize]{
+    itemsep=0.2em,
+    topsep=0.3em
+}
+
+\lstset{
+  numbers=left,        % Coloca os números à esquerda
+  stepnumber=1,        % Numera de 1 em 1 linha
+  numberstyle=\tiny,   % Tamanho da fonte dos números
+  numbersep=5pt,       % Espaço entre o número e o código
+  literate={ã}{{\~a}}1 {ç}{{\c{c}}}1 {ê}{{\^e}}1 {í}{{\'i}}1
+}
+
+% ================================================================
+% INFORMAÇÕES DO DOCUMENTO
+% ================================================================
+
+\title{
+    \textbf{Relatório de Injeção de Falhas}\\[0.3cm]
+    \large Formalização e Implementação de Testes de Injeção de Falhas em Dispositivos IoT
+}
+
+\author{Eduardo Diniz da Silva}
+\date{}
+
+% ================================================================
+% DOCUMENTO
+% ================================================================
+
+\begin{document}
+
+% ================================================================
+% FOLHA DE ROSTO
+% ================================================================
+
+\begin{center}
+    
+    \large
+    Escola de Artes, Ciências e Humanidades --- Universidade de São Paulo
+
+    \vspace{1.5cm}
+
+    \Large
+    \textbf{RELATÓRIO DE INJEÇÃO DE FALHAS}
+
+    \vspace{0.3cm}
+
+    \large
+    \textit{Formalização e Implementação de Testes de Injeção de Falhas em Dispositivos IoT}
+
+    \vspace{1cm}
+
+    \normalsize
+
+    \begin{tabular}{ll}
+        \textbf{Área:} & Sistemas de Informação / Segurança da Informação \\
+        \textbf{Estudante:} & Eduardo Diniz da Silva \\
+        \textbf{Orientador:} & Prof. Fábio Nakano
+    \end{tabular}
+
+\end{center}
+
+% ================================================================
+% RESUMO
+% ================================================================
+
+\section{Resumo}
+
+Este relatório descreve a formalização e implementação de testes de injeção de falhas em dispositivos IoT para a análise da familia de algoritmos Ascon, abordando a formalização do modelo de injeção de falhas, a classificação das falhas, a injeção de falhas e a coleta de dados. O objetivo é avaliar a resiliência do algoritmo Ascon frente a falhas induzidas, contribuindo para a compreensão de sua robustez em ambientes de operação adversos.
+
+
+% ================================================================
+% FORMALIZAÇÃO DO MODELO DE INJEÇÃO DE FALHAS
+% ================================================================
+\section{Formalização do Modelo de Injeção de Falhas}
+
+Neste trabalho, adotam-se os conceitos de \textit{fault} (falta), \textit{error} (erro) e \textit{failure} (falha) conforme a taxonomia de Avižienis, Laprie e Randell \cite{Avizienis2001}. A fault é definida como a causa raiz de uma anomalia, podendo permanecer dormente no sistema ou ser ativada, gerando um error. Este, por sua vez, caracteriza um estado interno alterado do sistema, seja ele detectado ou latente. Por fim, a failure é o evento visível que ocorre quando o erro se propaga até a interface de serviço, fazendo com que o sistema se desvie de seu comportamento correto esperado.
+
+Deste modo, apesar do nome comumente utilizado, a injeção de falhas não se refere à introdução de falhas diretamente no sistema, mas sim à introdução de faults, que podem levar a erros e, consequentemente, a falhas. 
+
+Para a classificação do efeito da injeção de falhas, utiliza-se a taxonomia de Xue, Zhang e Zou \cite{Xue2019}, que categoriza os efeitos em três categorias: 
+\begin{itemize}
+    \item \textbf{Correct Output (CO):} São os erros benignos, chamados de atenuados ou mascarados, onde o programa termina normalmente e produz a saída correta, apesar da presença de erros internos.
+    \item \textbf{Silent Data Corruption (SDC):} São erros não benignos, que não levam a falha do programa, onde o programa termina normalmente, mas produz uma saída incorreta, sem indicar a presença de erros.
+    \item \textbf{Crash (CR):} Também chamados de DUE/halt, são a consequência mais grave da injeção de falhas, onde o programa termina abruptamente, sem produzir saída, devido a erros internos.
+\end{itemize}
+
+O tipo de erro utilizado será o \textit{Single Event Upset (SEU)}, modelado matematicamente como um \textit{bit-flip}, que consiste na inversão do valor de um bit \cite{Geissler2014}.
+
+O ambiente de testes de injeção de falhas foi implementado utilizando o QEMU, um emulador de hardware, e o GDB, um depurador de código. O microcontrolador emulado é o ARM Cortex-M3 e o computador que roda o ambiente é um Acer Aspire go 15 com processador Intel Core i7-13620H, 16GB de RAM e sistema operacional Linux 7.2 com distruibuição Fedora 43.
+
+Para a injeção de falhas, o processo sera dividido em 3 etapas: 
+\begin{itemize}
+    \item \textbf{Interrupção:} Um script em Python vai enviar um sinal de pause para o GDB, interrompendo a emulação do QEMU em uma instrução aleatória. 
+    \item \textbf{Injeção:} Vai ser extraído o valor atual do registrador sorteado, aplicado o \textit{bit-flip} e reescrito o dado corrompido no ambiente de emulação.
+    \item \textbf{Propagação:} O script vai enviar um sinal de continue para o GDB para rastrear o impacto do \textit{bit-flip} na fluxo de dados do programa, coletando informações sobre o estado do sistema e os efeitos da injeção de falhas.
+\end{itemize}
+
+O alvo central do estudo é o algoritmo de criptografia Ascon, deste modo, a janela temporal de injeção será estritamente limitada ao período de execução da rotina criptográfica. Além disso, os \textit{bit-flips} afetarão apenas os registradores arquiteturais específicos (R0 a R12, SP, LR, PC e xPSR) e os endereços de memória reservados ao estado interno, chaves e nonces.
+
+Para a captura dos crashs a nivel de arquitetura, serão consideradas as exceções nativas do ARM Cortex-M3 \cite{arm:cortex_m3:exceptions}:
+\begin{itemize}
+    \item \textbf{HardFault:} Falha genérica que ocorre quando uma exceção não tratada é gerada.
+    \item \textbf{MemManage:} Falha de gerenciamento de memória que ocorre quando há uma violação de acesso à memória, como tentativa de leitura ou escrita em uma região protegida.
+    \item \textbf{UsageFault:} Falha de uso que ocorre quando há uma instrução inválida, divisão por zero ou outro erro de execução.
+    \item \textbf{BusFault:} Falha de barramento que ocorre quando há um erro de acesso à memória, como tentativa de leitura ou escrita em um endereço inválido.
+\end{itemize}
+
+\printbibliography[title={Referências Bibliográficas}]
+
+\end{document}
