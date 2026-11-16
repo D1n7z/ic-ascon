@@ -2,16 +2,20 @@
 
 extern void initialise_monitor_handles(void);
 
-int main(void) {
-    initialise_monitor_handles();
-
+__attribute__((noinline)) 
+int rotina_alvo(void) {
     volatile int soma = 0;
-
-    printf("Início da execução do programa\n");
     for (int i = 0; i < 5; i++) {
         soma += i;
     }
-    printf("Soma: %d\n", soma);
+    return soma;
+}
+
+int main(void) {
+    initialise_monitor_handles();
+
+    int resultado = rotina_alvo();
+    printf("RESULTADO: %d\n", resultado);
 
     return 0;
 }

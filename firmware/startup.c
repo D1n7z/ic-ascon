@@ -23,11 +23,19 @@ void zero_bss(void) {
     while (dst < &__bss_end) *dst++ = 0;
 }
 
+// Handlers de Exceção do Cortex-M3 (Alvos de monitorização do GDB)
+void HardFault_handler(void)  { while (1); }
+void MemManage_handler(void)  { while (1); }
+void BusFault_handler(void)   { while (1); }
+void UsageFault_handler(void) { while (1); }
+
+void Fim_execucao(void) { while (1); } // Função para indicar o fim da execução do programa
+
 void RESET_handler(void) {
     copy_data();
     zero_bss();
     main();
-    while (1);
+    Fim_execucao(); 
 }
 
 // Define a tabela de vetores de interrupção
@@ -35,4 +43,9 @@ __attribute__((section(".isr_vector")))
 uint32_t *vector_table[] = {
     (uint32_t *)&_estack,       // Posição 0: Onde fica o Stack (Pilha)
     (uint32_t *)RESET_handler,  // Posição 1: Onde começa o código
+    (uint32_t *)HardFault_handler,    // Posição 2: Redireciona para o handler da exceção HardFault
+    (uint32_t *)HardFault_handler,    // Posição 3: Handler da exceção HardFault
+    (uint32_t *)MemManage_handler,   // Posição 4: Handler da exceção MemManage
+    (uint32_t *)BusFault_handler,     // Posição 4: Handler da exceção BusFault
+    (uint32_t *)UsageFault_handler,   // Posição 5: Handler da exceção UsageFault
 };
